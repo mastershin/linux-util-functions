@@ -3,16 +3,14 @@
 # and prints the caller script names and line numbers
 # which is useful for debugging purpose.
 #
-# @maintainer: mastershin at gmail dot com
-# @version: 1.2.0
+# @maintainer: jae@voxelcloud.io
+# @version: 1.2.1
 
 # TIME_FORMAT='%F %T %Z'
 # TIME_FORMAT='%Y-%m-%d %T'
 timestamp() { date +"${TIME_FORMAT:-%T}"; }
 LOG() {
-  color=$2
-  printf $color
-  printf "${BASH_SOURCE[2]}"
+  printf "$2${BASH_SOURCE[2]}"
   for ((i = ${#BASH_LINENO[@]} - 1; i >= 1; i--)); do
     case ${FUNCNAME[i]} in
       LOG | DEBUG | INFO | WARN | ERROR) ;;
@@ -50,7 +48,7 @@ log_warn() {
       *) printf ' <%s:%s>' "${FUNCNAME[i]}" "${BASH_LINENO[i - 1]}" ;;
     esac
   done
-  printf "[INFO] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
+  printf "[WARN] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
 }
 log_debug() {
   printf "\033[90m${BASH_SOURCE[1]}"
@@ -61,7 +59,7 @@ log_debug() {
       *) printf ' <%s:%s>' "${FUNCNAME[i]}" "${BASH_LINENO[i - 1]}" ;;
     esac
   done
-  printf "[INFO] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
+  printf "[DEBUG] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
 }
 log_error() {
   printf "\033[31m${BASH_SOURCE[1]}"
@@ -72,5 +70,5 @@ log_error() {
       *) printf ' <%s:%s>' "${FUNCNAME[i]}" "${BASH_LINENO[i - 1]}" ;;
     esac
   done
-  printf "[INFO] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
+  printf "[ERROR] %s $1\033[0m\n" $(date +"${TIME_FORMAT:-%T}")
 }
