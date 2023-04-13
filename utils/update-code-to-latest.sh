@@ -3,7 +3,7 @@
 When the code contains @version: xxx.yyy.zzz, this script can be used to
 update all other scripts to the latest version, recursively.
 @author: Jae Shin (mastershin at gmail.com)
-@version: 0.0.1
+@version: 0.0.2
 ---
 usage() {
   echo "$0 [file] [latest] [update|dryrun]"
@@ -11,8 +11,13 @@ usage() {
   echo "  latest: 'latest' to find the latest version"
   echo "  update: update the file"
 }
+
+MD5="import sys, hashlib; print(hashlib.md5(open(sys.argv[1], 'rb').read()).hexdigest(),end=' ')"
 if [ $# == 1 ]; then
-  find . -name $1 -exec grep -EH --color=always '^@version: (.*)' {} \;
+  # find . -name $1 -exec grep -EH --color=always '^@version: (.*)' {} \; -exec md5 -r {} \;
+  find . -name $1 \
+    -exec python -c "$MD5" {} \; \
+    -exec grep -EH --color=always '^@version: (.*)$' {} \;
 
   echo "****************** version summary"
   version_list=$(find . -name $1 -exec grep -E --color=always '^@version: (.*)' {} \; | sort -Vru)
@@ -27,8 +32,8 @@ elif [ $# -ge 2 ]; then
   action=$3
 
   if [ "$latest_version" == 'latest' ]; then
-    version_list=$(find . -name $1 -exec grep -E '^@version: (.*)' {} \; | sort -Vru)
-    latest_version=$(echo "$version_list" | head -n 1)
+    version_list=$(find . -name $1 -exec python -c "$MD5" {} \; -exec grep -E '^@version: (.*)' {} \; | sort -Vru)
+    latest_version=$(echo "$version_list" | head -n 1 | awk '{print $3}')
     echo "Using latest version=$latest_version"
   else
     echo 'Please use "latest" only for now'
